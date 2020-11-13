@@ -1,15 +1,19 @@
 import React, { useState } from "react";
 import axios from "axios";
+import {axiosWithAuth} from './Utils/axiosWithAuth'
+import {useHistory} from 'react-router-dom'
+
 
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
 
-const ColorList = ({ colors, updateColors }) => {
+const ColorList = ({ colors, updateColors, getColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const {push} = useHistory()
 
   const editColor = color => {
     setEditing(true);
@@ -19,12 +23,32 @@ const ColorList = ({ colors, updateColors }) => {
   const saveEdit = e => {
     e.preventDefault();
     // Make a put request to save your updated color
+    axiosWithAuth()
+    .put(`/api/colors/${colorToEdit.id}`, colorToEdit)
     // think about where will you get the id from...
+    // the id comes from the color state
+    .then(response=>{
+      console.log(response)
+      setEditing(false)
+    })
     // where is is saved right now?
   };
 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(response=>{
+      updateColors(colors.filter(colorSelection=>{
+        if(colorSelection.id !==color.id){
+          setEditing(false)
+        }
+        push('/bubblePage')
+      }))
+    })
+    .catch(error=>{
+      console.log('THIS IS YOUR ERROR', error)
+    })
   };
 
   return (
@@ -75,7 +99,7 @@ const ColorList = ({ colors, updateColors }) => {
             />
           </label>
           <div className="button-row">
-            <button type="submit">save</button>
+            <button testid='test'type="submit">save</button>
             <button onClick={() => setEditing(false)}>cancel</button>
           </div>
         </form>
