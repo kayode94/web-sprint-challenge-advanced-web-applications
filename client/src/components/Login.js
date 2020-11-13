@@ -1,35 +1,33 @@
 import React,{useState} from "react";
+import axios from 'axios'
+import {useHistory} from 'react-router-dom'
 import {axiosWithAuth} from './Utils/axiosWithAuth'
 
 
 const initialLoginValue = {
-  credentials:{
     username: '',
     password: ''
-  }
 }
 const Login = () => {
 
 const [login, setLogin] = useState(initialLoginValue)
-
+const {push} = useHistory()
 //event handlers
-
 const handleChange = (event) =>{
   setLogin({
-    credentials:{
       ...login,
       [event.target.name]: event.target.value
-    }
   })
 }
 
 const handleLogin = (event) =>{
+  event.preventDefault()
   axiosWithAuth()
   .post('/api/login', login)
   .then(response=>{
     console.log(response.data)
-    localStorage.setItem('token', response.data.payload)  
-    
+    localStorage.setItem('token', response.data.payload)
+    push('/bubblePage')  
   })
   .catch(error=>{
     console.log('THIS IS YOUR ERROR', error)
